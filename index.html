@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ডেট ক্যালকুলেটর - BCT Tools Hub</title>
+    
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #4338ca; --primary-light: #c7d2fe;
+            --secondary: #10b981;
+            --bg-color: #f7f8fc; --surface-color: #ffffff;
+            --text-color: #111827; --text-muted: #6b7280;
+            --border-color: #e5e7eb; --radius: 16px;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-speed: 0.3s;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', 'Hind Siliguri', sans-serif; line-height: 1.7; }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 20px; }
+        
+        /* Header */
+        .main-header { background: rgba(255, 255, 255, 0.8); padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: flex-start; align-items: center; }
+        .logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-color); }
+        .logo img { height: 45px; }
+        .logo-text { font-size: 1.3rem; font-weight: 800; }
+        .logo-text span { color: var(--primary); }
+
+        /* Page Header */
+        .page-header { text-align: center; padding: 20px; }
+        .page-header h1 { font-size: 2.8rem; font-weight: 800; }
+        .page-header p { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 10px auto 0 auto; }
+
+        /* Calculator Styles */
+        .calculator-wrapper { background: var(--surface-color); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow-md); }
+        .tab-nav { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 25px; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-size: 1.1rem; font-weight: 600; cursor: pointer; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 8px; font-weight: 600; }
+        .form-group input[type="date"], .form-group input[type="number"] { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; font-family: inherit; }
+        .form-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .options { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+        .action-buttons { text-align: center; margin: 25px 0; }
+        .calc-btn { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1.1rem; transition: all 0.3s; }
+        .calc-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .add-subtract-btns { display: flex; gap: 15px; justify-content: center; }
+        .add-subtract-btns .calc-btn.add { background: var(--secondary); }
+        .add-subtract-btns .calc-btn.add:hover { background: #059669; }
+        .add-subtract-btns .calc-btn.subtract { background: #ef4444; }
+        .add-subtract-btns .calc-btn.subtract:hover { background: #dc2626; }
+        .results-wrapper { margin-top: 20px; background: var(--bg-color); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .results-wrapper h3 { text-align: center; font-size: 1.5rem; margin-bottom: 20px; color: var(--primary-dark); }
+        #difference-results .main-result { text-align: center; margin-bottom: 20px; }
+        #difference-results .main-result span { font-size: 2.5rem; font-weight: 800; color: var(--text-color); }
+        .detailed-results { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center; }
+        .result-item { background: var(--surface-color); padding: 15px; border-radius: 8px; }
+        .result-item .label { font-weight: 600; color: var(--text-muted); display: block; }
+        .result-item .value { font-size: 1.5rem; font-weight: 700; color: var(--text-color); }
+        #add-subtract-result .value { font-size: 2.5rem; font-weight: 800; color: var(--text-color); }
+        #error-message { text-align: center; color: #be123c; font-weight: 600; min-height: 24px; }
+
+        /* --- Updated Footer Styles --- */
+        .main-footer { background: var(--text-color); color: #a0aec0; padding: 40px 0 20px 0; margin-top: 50px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; text-align: center; }
+        .footer-about .logo { margin-bottom: 20px; color: white; display: inline-flex; }
+        .footer-about p { max-width: 400px; margin: 0 auto 20px auto; }
+        .footer-bottom { border-top: 1px solid #4a5568; padding-top: 25px; font-size: 0.95rem; }
+        .footer-bottom a { color: var(--primary-light); text-decoration: none; font-weight: 600; }
+        .footer-bottom a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <img src="https://i.ibb.co/MyZXHdHf/app-icon.png" alt="BCT TOOLS HUB Logo">
+                <div class="logo-text">BCT<span> TOOLS HUB</span></div>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1>ডেট ক্যালকুলেটর</h1>
+                <p>দুই তারিখের মধ্যে পার্থক্য বা নির্দিষ্ট তারিখ যোগ/বিয়োগ করুন।</p>
+            </div>
+            
+            <div class="calculator-wrapper">
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-tab="difference">তারিখের পার্থক্য</button>
+                    <button class="tab-btn" data-tab="add-subtract">তারিখ যোগ/বিয়োগ</button>
+                </nav>
+
+                <!-- Tab 1: Date Difference -->
+                <div id="difference" class="tab-content active">
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label for="start-date">শুরুর তারিখ</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="end-date">শেষের তারিখ</label>
+                            <input type="date" id="end-date">
+                        </div>
+                    </div>
+                    <div class="options">
+                        <input type="checkbox" id="include-end-date">
+                        <label for="include-end-date">শেষের দিনটি গণনায় অন্তর্ভুক্ত করুন</label>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="calculate-diff-btn" class="calc-btn">পার্থক্য হিসাব করুন</button>
+                    </div>
+                    <div id="difference-results" class="results-wrapper" style="display: none;">
+                        <h3>পার্থক্য</h3>
+                        <div class="main-result">
+                            <span id="diff-years">0</span> <small>বছর</small>
+                            <span id="diff-months">0</span> <small>মাস</small>
+                            <span id="diff-days">0</span> <small>দিন</small>
+                        </div>
+                        <div class="detailed-results">
+                            <div class="result-item">
+                                <span class="label">মোট দিন</span>
+                                <span id="total-days" class="value">0</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">মোট মাস</span>
+                                <span id="total-months" class="value">0</span>
+                            </div>
+                             <div class="result-item">
+                                <span class="label">মোট সপ্তাহ</span>
+                                <span id="total-weeks" class="value">0</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">মোট ঘণ্টা</span>
+                                <span id="total-hours" class="value">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Add/Subtract Date -->
+                <div id="add-subtract" class="tab-content">
+                    <div class="form-group" style="max-width: 300px; margin: 0 auto 20px auto;">
+                         <label for="start-date-add">শুরুর তারিখ</label>
+                         <input type="date" id="start-date-add">
+                    </div>
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label for="years-to-add">বছর</label>
+                            <input type="number" id="years-to-add" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="months-to-add">মাস</label>
+                            <input type="number" id="months-to-add" min="0" value="0">
+                        </div>
+                         <div class="form-group">
+                            <label for="days-to-add">দিন</label>
+                            <input type="number" id="days-to-add" min="0" value="0">
+                        </div>
+                    </div>
+                     <div class="action-buttons add-subtract-btns">
+                        <button id="subtract-btn" class="calc-btn subtract">বিয়োগ করুন</button>
+                        <button id="add-btn" class="calc-btn add">যোগ করুন</button>
+                    </div>
+                    <div id="add-subtract-result" class="results-wrapper" style="display: none;">
+                        <h3>নতুন তারিখ</h3>
+                        <p class="value" id="result-date"></p>
+                    </div>
+                </div>
+                <div id="error-message"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-about">
+                <a href="homepage.html" class="logo">
+                    <img src="https://i.ibb.co/MyZXHdHf/app-icon.png" alt="BCT TOOLS HUB Logo">
+                    <div class="logo-text">BCT<span> TOOLS HUB</span></div>
+                </a>
+                <p>BCT TOOLS HUB হলো Bangladesh Cyber Troops-এর একটি উদ্যোগ, যার লক্ষ্য প্রয়োজনীয় ডিজিটাল টুলস সবার জন্য সহজলভ্য করা।</p>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 BCT TOOLS HUB | Developed By <a href="https://contac.kelvinasford.netlify.app" target="_blank">Kelvin Ashford</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const errorMessage = document.getElementById('error-message');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(btn.dataset.tab).classList.add('active');
+                    hideResults();
+                    errorMessage.textContent = '';
+                });
+            });
+
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            const includeEndDateCheck = document.getElementById('include-end-date');
+            const calculateDiffBtn = document.getElementById('calculate-diff-btn');
+            const diffResultsWrapper = document.getElementById('difference-results');
+            const startDateAddInput = document.getElementById('start-date-add');
+            const yearsInput = document.getElementById('years-to-add');
+            const monthsInput = document.getElementById('months-to-add');
+            const daysInput = document.getElementById('days-to-add');
+            const addBtn = document.getElementById('add-btn');
+            const subtractBtn = document.getElementById('subtract-btn');
+            const addSubtractResultWrapper = document.getElementById('add-subtract-result');
+
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.value = today;
+            endDateInput.value = today;
+            startDateAddInput.value = today;
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                hideResults();
+            }
+
+            function hideResults() {
+                diffResultsWrapper.style.display = 'none';
+                addSubtractResultWrapper.style.display = 'none';
+            }
+
+            calculateDiffBtn.addEventListener('click', () => {
+                const startDateStr = startDateInput.value;
+                const endDateStr = endDateInput.value;
+
+                if (!startDateStr || !endDateStr) {
+                    showError('অনুগ্রহ করে শুরুর এবং শেষের তারিখ উভয়ই নির্বাচন করুন।');
+                    return;
+                }
+                let startDate = new Date(startDateStr);
+                let endDate = new Date(endDateStr);
+
+                if (startDate > endDate) {
+                    showError('শুরুর তারিখ শেষের তারিখের পরে হতে পারে না।');
+                    return;
+                }
+                errorMessage.textContent = '';
+                
+                let endCalculationDate = new Date(endDate);
+                if (includeEndDateCheck.checked) {
+                    endCalculationDate.setDate(endCalculationDate.getDate() + 1);
+                }
+
+                const diffTime = Math.abs(endCalculationDate - startDate);
+                const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                let start = new Date(startDateStr);
+                let end = new Date(endDateStr);
+                let years = end.getFullYear() - start.getFullYear();
+                let months = end.getMonth() - start.getMonth();
+                let days = end.getDate() - start.getDate();
+
+                if (includeEndDateCheck.checked) {
+                   days += 1;
+                }
+                
+                if (days < 0) {
+                    months--;
+                    const prevMonthLastDay = new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+                    days += prevMonthLastDay;
+                }
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+                
+                document.getElementById('diff-years').textContent = years;
+                document.getElementById('diff-months').textContent = months;
+                document.getElementById('diff-days').textContent = days;
+                document.getElementById('total-days').textContent = totalDays.toLocaleString('bn-BD');
+                document.getElementById('total-months').textContent = (years * 12 + months).toLocaleString('bn-BD');
+                document.getElementById('total-weeks').textContent = Math.floor(totalDays / 7).toLocaleString('bn-BD');
+                document.getElementById('total-hours').textContent = (totalDays * 24).toLocaleString('bn-BD');
+                
+                diffResultsWrapper.style.display = 'block';
+            });
+
+            function calculateNewDate(operation) {
+                const startDateStr = startDateAddInput.value;
+                if (!startDateStr) {
+                    showError('অনুগ্রহ করে একটি শুরুর তারিখ নির্বাচন করুন।');
+                    return;
+                }
+                const years = parseInt(yearsInput.value) || 0;
+                const months = parseInt(monthsInput.value) || 0;
+                const days = parseInt(daysInput.value) || 0;
+                
+                if (years === 0 && months === 0 && days === 0) {
+                    showError('অনুগ্রহ করে যোগ বা বিয়োগ করার জন্য কোনো মান দিন।');
+                    return;
+                }
+                errorMessage.textContent = '';
+                
+                const date = new Date(startDateStr);
+                
+                if (operation === 'add') {
+                    date.setFullYear(date.getFullYear() + years);
+                    date.setMonth(date.getMonth() + months);
+                    date.setDate(date.getDate() + days);
+                } else if (operation === 'subtract') {
+                    date.setFullYear(date.getFullYear() - years);
+                    date.setMonth(date.getMonth() - months);
+                    date.setDate(date.getDate() - days);
+                }
+                
+                const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                document.getElementById('result-date').textContent = date.toLocaleDateString('bn-BD', options);
+                addSubtractResultWrapper.style.display = 'block';
+            }
+            
+            addBtn.addEventListener('click', () => calculateNewDate('add'));
+            subtractBtn.addEventListener('click', () => calculateNewDate('subtract'));
+        });
+    </script>
+</body>
+</html>
